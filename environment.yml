@@ -1,0 +1,35 @@
+name: dataformats
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - docutils=0.16
+  - h5py
+  - jupyter
+  - jupyterlab
+  - mamba
+  - matplotlib
+  - blas=*=*mkl*
+  - libcblas=*=*mkl*
+  - librosa
+  - numpy
+  - nodejs
+  - pandas
+  - pandoc
+  - pip
+  - pyarrow
+  - openpyxl
+  - pytables
+  - pyyaml
+  - scipy
+  - sphinx
+  - sphinx-autobuild
+  - sphinx_rtd_theme
+  - sqlalchemy
+  - pip:
+    - memory_profiler
+    - myst_nb
+    - webdataset
+    - https://github.com/coderefinery/sphinx-lesson/archive/master.zip
+    - https://github.com/aaltoscicomp/sphinx-aaltoscicomp-branding/archive/master.zip
+    - sphinx_rtd_theme_ext_color_contrast
