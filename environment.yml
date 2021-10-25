@@ -18,6 +18,7 @@ dependencies:
   - pandoc
   - pip
   - pyarrow
+  - opencv
   - openpyxl
   - pytables
   - pyyaml
