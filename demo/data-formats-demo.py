@@ -5,28 +5,18 @@ import pandas as pd
 import pyarrow.parquet as pq
 from tools.singlefile import read_image
 from tools.parquet import read_image_bytes
+from tools.shuffling import get_rng, shuffle_list, shuffle_pandas
 
 
 DATAFOLDER = 'data/deep'
 LABELS = 'data/labels.csv'
-
-def get_rng():
-    return np.random.default_rng(seed=10)
-
-
-def shuffle_list(lst, rng):
-    rng.shuffle(lst)
-
-    
-def shuffle_pandas(df, rng):
-    index_shuffle = np.asarray(df.index)
-    rng.shuffle(index_shuffle)
-    return df.iloc[index_shuffle]
+PARQUET_FILE = 'data/deep.parquet'
+PARQUET_FILE_SHUFFLED = 'data/deep-shuffled.parquet'
 
 
 def read_parquet_sequential():
 
-    pa_table = pq.read_table('data/deep.parquet')
+    pa_table = pq.read_table(PARQUET_FILE)
 
     average_brightness = 0
 
@@ -41,19 +31,20 @@ def read_parquet_sequential():
         for image_bytes in images:
             average_brightness += read_image_bytes(image_bytes).mean()
 
-        i += 1
-
-        if i%1000 == 0:
-            print('Average brightness of %d images: %f' % (i, average_brightness / i))
+            i += 1
+            if i%1000 == 0:
+                print('Average brightness of %d images: %f' % (i, average_brightness / i))
 
     average_brightness /= len(pa_table)
+
+    print('Average brightness of images: %f' % average_brightness)
 
     print(average_brightness)
 
 
 def read_parquet_random():
     
-    pa_table = pq.read_table('data/deep-random.parquet')
+    pa_table = pq.read_table(PARQUET_FILE_SHUFFLED)
 
     average_brightness = 0
 
@@ -85,9 +76,9 @@ def read_parquet_random():
 
     average_brightness /= len(pa_table)
 
-    print(average_brightness)
+    print('Average brightness of images: %f' % average_brightness)
 
-    print(order[:100])
+    print('First 50 indices: %s' % str(order[:50]))
 
     
 def read_singlefile_sequential():
@@ -97,12 +88,15 @@ def read_singlefile_sequential():
     labels['Fullpath'] = labels['Filename'].apply(lambda filename: os.path.join(DATAFOLDER, filename))
 
     average_brightness = 0
-
-    for filename in labels['Fullpath']:
+  
+    for i, filename in enumerate(labels['Fullpath']):
         average_brightness += read_image(filename).mean()
+        if i%1000 == 0 and i>0:
+            print('Average brightness of %d images: %f' % (i, average_brightness / i))
 
     average_brightness /= len(labels)
-    print(average_brightness)
+
+    print('Average brightness of images: %f' % average_brightness)
 
     
 def read_singlefile_random():
@@ -124,9 +118,10 @@ def read_singlefile_random():
             print('Average brightness of %d images: %f' % (i, average_brightness / i))
 
     average_brightness /= len(labels)
-    print(average_brightness)
 
-    print(list(labels.index)[:100])
+    print('Average brightness of images: %f' % average_brightness)
+
+    print('First 50 indices: %s' % str(list(labels.index)[:50]))
 
 if __name__=="__main__":
     

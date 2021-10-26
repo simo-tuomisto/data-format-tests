@@ -107,15 +107,15 @@
 <h2>Disclaimer</h2>
 <ul>
 <li>I have worked a lot with I/O problems, but don’t take me for an authority on solving them. I suggest looking at what big players are doing.</li>
-<li>I/O frameworks move constantly, I might have missed some good frameworks. Let me know if you have good suggestions.</li>
+<li>I/O frameworks move constantly, I might have missed some good tools. Let me know if you have good suggestions.</li>
 </ul>
 </section>
-<section id="what-is-common-for-io-problems" class="slide level2">
-<h2>What is common for I/O problems?</h2>
+<section id="why-io-problems-are-important" class="slide level2">
+<h2>Why I/O problems are important?</h2>
 <ul>
 <li>Shared filesystems have to deal with increased load, which can result in various problems</li>
-<li>Jobs execution slows down as CPU/RAM waits for I/O</li>
-<li>They slow down interactive usage</li>
+<li>Job execution slows down as CPU/RAM/GPU waits for I/O</li>
+<li>Bad I/O hampers interactive usage and waiting for I/O is very annoying as an user as it does not feel productive</li>
 </ul>
 </section>
 <section id="what-kinds-of-problems-are-there" class="slide level2">
@@ -125,29 +125,31 @@
 </ul>
 <div class="fragment">
 <ol type="1">
-<li>“ab != ba”-problems</li>
+<li>“ab != ba”-problem</li>
 </ol>
 </div>
 <div class="fragment">
 <ol start="2" type="1">
-<li>“Jenga”-problems</li>
+<li>“Jenga”-problem</li>
 </ol>
 </div>
 <div class="fragment">
 <ol start="3" type="1">
-<li>“I hope I didn’t forget anything”-problems</li>
+<li>“I hope I didn’t forget anything”-problem</li>
 </ol>
 </div>
 <div class="fragment">
 <ol start="4" type="1">
-<li>“She’ll have the steak”-problems</li>
+<li>“She’ll have the steak”-problem</li>
 </ol>
 </div>
 </section>
 <section id="ab-ba-problem" class="slide level2">
 <h2>“ab != ba”-problem</h2>
+<div class="fragment">
 <p>In many fields of mathematics, all operations do not have the commutative property.</p>
-<p>For matrices usually: <span class="math display"><em>A</em><em>B</em> ≠ <em>B</em><em>A</em></span></p>
+<p>E.g. for matrices usually: <span class="math display"><em>A</em><em>B</em> ≠ <em>B</em><em>A</em></span></p>
+</div>
 <div class="fragment">
 <p>How is this related to I/O?</p>
 </div>
@@ -163,8 +165,8 @@
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        calculate_model(data, parameter)</span></code></pre></div>
 <p>vs.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> datafile <span class="kw">in</span> datafiles:</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> parameter <span class="kw">in</span> parameters:</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        data <span class="op">=</span> load_data(datafile)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> load_data(datafile)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> parameter <span class="kw">in</span> parameters:</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        calculate_model(data, parameter)</span></code></pre></div>
 </section>
 <section id="ab-ba-problem-2" class="slide level2">
@@ -176,6 +178,11 @@
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> datafile <span class="kw">in</span> datafiles: <span class="co"># &lt;- I/O is multiplied</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        data <span class="op">=</span> load_data(datafile)</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        calculate_model(data, parameter)</span></code></pre></div>
+<p>vs.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> datafile <span class="kw">in</span> datafiles:</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> load_data(datafile) <span class="co"># &lt;- I/O is not multiplied</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> parameter <span class="kw">in</span> parameters:</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        calculate_model(data, parameter)</span></code></pre></div>
 </section>
 <section id="ab-ba-problem-3" class="slide level2">
 <h2>“ab != ba”-problem</h2>
@@ -189,12 +196,13 @@
 <h2>“ab != ba”-problem</h2>
 <ul>
 <li><p>One way of spotting this is with <code>strace</code>:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">strace</span> <span class="at">-c</span> <span class="at">-e</span> trace=file ./command</span></code></pre></div></li>
+<div class="sourceCode" id="cb5"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">strace</span> <span class="at">-c</span> <span class="at">-e</span> trace=%file,read,write ./command</span></code></pre></div></li>
 <li><p>If the number of IO operations scales with the number of parameters, something might be amiss.</p></li>
 </ul>
 </section>
 <section id="jenga-problem" class="slide level2">
 <h2>“Jenga”-problem</h2>
+<div class="fragment">
 <ul>
 <li>Closely related to the “ab != ba”-problem.</li>
 <li>First steps do not cause problems, but as time goes on the situation becomes more problematic due to constant I/O.</li>
@@ -202,13 +210,70 @@
 <figure>
 <img data-src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Jenga_distorted.jpg?download" width="150" alt="Jenga" /><figcaption aria-hidden="true">Jenga<a href="#/fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></figcaption>
 </figure>
+</div>
 </section>
 <section id="jenga-problem-1" class="slide level2">
 <h2>“Jenga”-problem</h2>
 <ul>
 <li>I/O in machine learning is especially suspect to this problem as data will be iterated over multiple times</li>
 <li>Having a bad I/O pattern doesn’t matter for one epoch, but as training can consist of thousands of epochs, the overall result is bad</li>
+<li>Bad I/O patterns can result in bad GPU utilization in deep learning</li>
 </ul>
+</section>
+<section id="jenga-problem-2" class="slide level2">
+<h2>“Jenga”-problem</h2>
+<ul>
+<li>Using good data formats (e.g. <a href="https://parquet.apache.org/documentation/latest/">Parquet</a>, <a href="https://github.com/webdataset/webdataset">webdataset</a>) and following best practice guides usually helps (e.g. <a href="https://keras.io/getting_started/intro_to_keras_for_engineers/">Keras</a>, <a href="https://www.tensorflow.org/guide/data_performance">Tensorflow</a> and <a href="https://pytorch.org/tutorials/recipes/recipes/tuning_guide.html">PyTorch</a> have good guides)</li>
+</ul>
+</section>
+<section id="jenga-problem-3" class="slide level2">
+<h2>“Jenga”-problem</h2>
+<p>Quick demo:</p>
+<p>https://github.com/simo-tuomisto/data-format-tests</p>
+</section>
+<section id="i-hope-i-didnt-forget-anything-problem" class="slide level2">
+<h2>“I hope I didn’t forget anything”-problem</h2>
+<div class="fragment">
+<ul>
+<li>It is quite common practice to carry everything that was in the initial data throughout the whole analysis</li>
+<li>This is wasteful and pre-processing of data will reduce the needed resources (space, ram, etc.)</li>
+<li>Usually a mapping between initial data and processed data would suffice</li>
+</ul>
+</div>
+</section>
+<section id="i-hope-i-didnt-forget-anything-problem-1" class="slide level2">
+<h2>“I hope I didn’t forget anything”-problem</h2>
+<ul>
+<li>This is especially problematic when working remotely as transferring full datasets is slower than transferring increments</li>
+<li>Problem can be minimized when using data analysis libraries such as pandas that allow for easy data merging from multiple sources</li>
+<li>This is closely related to the “She’ll have the steak”-problem</li>
+</ul>
+</section>
+<section id="shell-have-the-steak-problem" class="slide level2">
+<h2>“She’ll have the steak”-problem</h2>
+<p>Quite often pipelines are designed in the following way:</p>
+<div class="fragment">
+<ol type="1">
+<li>I need to read my data in to inspect it.</li>
+<li>Coding framework &amp; data format is chosen.</li>
+<li>I need to fit this data to a model / solver. How do I fit it to it?</li>
+<li>Data fits to the framework poorly.</li>
+</ol>
+</div>
+</section>
+<section id="shell-have-the-steak-problem-1" class="slide level2">
+<h2>“She’ll have the steak”-problem</h2>
+<div class="fragment">
+<ul>
+<li>Quite often pipelines are designed in the following way:
+<ol type="1">
+<li>I need to read my data in to inspect it.</li>
+<li>Coding framework &amp; data format is chosen.</li>
+<li>I need to fit this data to a model / solver. How do I fit it to it?</li>
+<li>Data fits to the framework poorly.</li>
+</ol></li>
+</ul>
+</div>
 </section>
 <section class="footnotes" role="doc-endnotes">
 <hr />
