@@ -78,8 +78,8 @@ for datafile in datafiles:
 
 ```python
 for parameter in parameters:
-    for datafile in datafiles: # <- I/O is multiplied
-        data = load_data(datafile)
+    for datafile in datafiles:
+        data = load_data(datafile) # <- I/O is multiplied
         calculate_model(data, parameter)
 ```
 vs.
@@ -93,7 +93,7 @@ for datafile in datafiles:
 ## "ab != ba"-problem
 
 - The problem might look trivial, but it is surprisingly hard to spot!
-- Usually requires unraveling the whole workflow.
+- Usually requires unraveling most of the workflow.
 - When working with small data, this might not cause any problems.
 
 ## "ab != ba"-problem
@@ -111,9 +111,9 @@ for datafile in datafiles:
 - Closely related to the "ab != ba"-problem.
 - First steps do not cause problems, but as time goes on the situation becomes more problematic due to constant I/O.
 
-![Jenga[^1]](https://upload.wikimedia.org/wikipedia/commons/6/6b/Jenga_distorted.jpg?download){ width=150px }
+![Jenga](https://upload.wikimedia.org/wikipedia/commons/6/6b/Jenga_distorted.jpg?download){ width=150px }
 
-[^1]: [Source: Wikipedia](https://commons.wikimedia.org/w/index.php?curid=17999924)
+[Source: Wikipedia](https://commons.wikimedia.org/w/index.php?curid=17999924)
 
 ## "Jenga"-problem
 
@@ -173,5 +173,89 @@ A better solution would be to look at the problem from the other end:
 
 - Major frameworks usually have a preferred way of working with data (e.g.
   [tidy data](https://www.jstatsoft.org/index.php/jss/article/view/v059i10/v59i10.pdf) with Pandas,
-  data loaders for deep learning toolkits, NetCDF or VTK for physics simulations, ...)
-- Downside is that user might need to write visualization tools with respect to these frameworks
+  data loaders for deep learning toolkits, NetCDF for physics simulations, ...)
+
+. . .
+
+- Downside is that one might need to write visualization tools with respect to these data formats needed by these frameworks
+
+. . .
+
+- Upside is other people are doing the same thing: there are lots of already existing tools
+
+## Profiling vs understanding
+
+## Profiling vs understanding
+
+- Quite often when talking about I/O we'll use terms such as `Megabytes per second` or `I/O operations per second`
+- Profiling is good, but more often **understanding what we're trying to accomplish with the data** is more important
+
+## Profiling vs understanding
+
+- Computers will try to do what they are told to do, even if that is inefficient
+
+. . .
+
+- Often we need to ask how the computer perceives what we're telling it to do
+
+## Example in understanding a problem
+
+Common problem in deep learning is related to **randomness**:
+
+We want to randomize our data ordering for each epoch
+
+## Example in understanding a problem
+
+- This is problematic, as random access is much slower than sequential access
+- To fix this, we give up some degree of randomness for increased efficiency
+
+## Example in understanding a problem
+
+Consider shuffling of a deck of playing cards:
+
+![](graphs/playing-cards-1.svg)
+
+## Example in understanding a problem
+
+Instead of shuffling the deck, we split the deck into multiple batches:
+
+![](graphs/playing-cards-2.svg)
+
+
+## Example in understanding a problem
+
+We shuffle the batches randomly:
+
+![](graphs/playing-cards-3.svg)
+
+
+## Example in understanding a problem
+
+We shuffle the data within each batch:
+
+![](graphs/playing-cards-4.svg)
+
+
+## Example in understanding a problem
+
+Is this ordering random enough?
+
+![](graphs/playing-cards-5.svg)
+
+. . .
+
+More often than not, it is.
+
+## Example in understanding a problem
+
+- This kind of IO can be done sequentially.
+- We still get randomization, but not **complete randomization**.
+- Vast majority of big data analysis uses this.
+
+## Conclusions
+
+## Conclusions
+
+- I/O problems are often tied to the way we're working
+- To solve them, we need to look at our workflows
+- Looking at the problem from the computer's point of view can help
