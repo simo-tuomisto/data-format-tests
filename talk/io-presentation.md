@@ -258,6 +258,7 @@ More often than not, it is.
 - This kind of IO can be done sequentially.
 - We still get randomization, but not **complete randomization**.
 - Vast majority of big data analysis uses this.
+- This was used in the demo as well.
 
 ## Conclusions
 
