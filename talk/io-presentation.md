@@ -136,8 +136,8 @@ https://github.com/simo-tuomisto/data-format-tests
 . . .
 
 - It is quite common practice to carry everything that was in the initial data throughout the whole analysis
-- This is wasteful and pre-processing of data will reduce the needed resources (space, ram, etc.)
-- Usually a mapping between initial data and processed data would suffice
+- Reducing the data size would reduce the needed resources (space, ram, etc.)
+- Usually having a mapping between initial data and processed data would be sufficient
 
 ## "I hope I didn't forget anything"-problem
 
@@ -177,7 +177,7 @@ A better solution would be to look at the problem from the other end:
 
 . . .
 
-- Downside is that one might need to write visualization tools with respect to these data formats needed by these frameworks
+- Downside is that one might need to write visualization tools with respect to the data formats needed by these frameworks
 
 . . .
 
@@ -188,7 +188,14 @@ A better solution would be to look at the problem from the other end:
 ## Profiling vs understanding
 
 - Quite often when talking about I/O we'll use terms such as `Megabytes per second` or `I/O operations per second`
+
+. . .
+
 - Profiling is good, but more often **understanding what we're trying to accomplish with the data** is more important
+
+. . .
+
+- Knowing that you're shoveling crap fast doesn't help with the fact that you're still shoveling crap
 
 ## Profiling vs understanding
 
